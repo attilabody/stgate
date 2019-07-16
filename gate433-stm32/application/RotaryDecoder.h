@@ -29,7 +29,7 @@ public:
 private:
 	IRotaryConsumer	*m_consumer;
 	GPIO_TypeDef	*m_clkPort, *m_dataPort, *m_switchPort;
-	uint16_t		m_clkPim, m_dataPin, m_switchPin;
+	uint16_t		m_clkPin, m_dataPin, m_switchPin;
 	uint8_t			m_pulsesPerStep;
 
 	uint32_t		m_lastClkTick = 0;

@@ -22,7 +22,7 @@ RotaryDecoder::	RotaryDecoder(
 , m_clkPort(clkPort)
 , m_dataPort(dataPort)
 , m_switchPort(switchPort)
-, m_clkPim(clkPin)
+, m_clkPin(clkPin)
 , m_dataPin(dataPin)
 , m_switchPin(switchPin)
 , m_pulsesPerStep(pulsesPerStep)
