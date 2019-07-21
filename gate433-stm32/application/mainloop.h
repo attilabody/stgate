@@ -23,7 +23,6 @@
 #include "pulsingoutput.h"
 #include "i2cdb.h"
 #include "inductiveloop.h"
-#include "RotaryDecoder.h"
 #include "commsyms.h"
 
 
@@ -31,8 +30,6 @@ class MainLoop
 		: public sg::Singleton<MainLoop>
 		, public RFDecoder::IDecoderCallback
 		, public sg::Usart::IReceiverCallback
-		, public RotaryDecoder
-		, public RotaryDecoder::IRotaryConsumer
 {
 	friend class sg::Singleton<MainLoop>;
 
@@ -84,12 +81,6 @@ private:
 	uint16_t		m_code = 0xffff;
 	uint16_t		m_countedCode = 0xffff;
 	volatile bool	m_codeReceived = false;
-
-	// IRotaryDecoder
-	virtual void Step(bool up);
-	virtual void Click(bool on);
-	volatile int32_t	m_rotaryCounter = 0;
-	volatile bool 		m_rotaryButton = false;
 
 	static const uint8_t CODE_LOG_QUEUE_SIZE = 4;
 	uint16_t		m_codeLogQueue[CODE_LOG_QUEUE_SIZE];
