@@ -153,6 +153,7 @@ void MainLoop::CommandProcessor::Process(sg::Usart &com, char * buffer)
 			com << ERR << " DTFMT" << sg::Usart::endl;
 
 	} else if(IsCommand(CMD_CLEARSTATUS)) {	// clear statuses
+		/*
 		uint16_t from(GetParam());
 		uint16_t to( GetParam());
 		uint16_t id;
@@ -174,7 +175,9 @@ void MainLoop::CommandProcessor::Process(sg::Usart &com, char * buffer)
 		if(id != to + 1)
 			PrintRespErr(com);
 		else
-			PrintRespOk(com);
+		*/
+		m_parent.ClrAllStatus();
+		PrintRespOk(com);
 
 	} else if(IsCommand(CMD_DUMPSHUFFLE)) {	// dump shuffle
 		SdFile	f;

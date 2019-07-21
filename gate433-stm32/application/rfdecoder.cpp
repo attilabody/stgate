@@ -110,12 +110,6 @@ void RFDecoder::ProcessPeriod(bool level, uint16_t length)
 }
 
 ////////////////////////////////////////////////////////////////////
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-	RFDecoder::Instance().PeriodEllapsed(htim);
-}
-
-////////////////////////////////////////////////////////////////////
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
 	RFDecoder::Instance().CaptureCallback(htim);

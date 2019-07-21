@@ -32,7 +32,8 @@
 
 extern "C" void _MainLoop();
 extern "C" void HAL_SYSTICK_Callback(void);
-extern "C" void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
+extern "C" void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
+extern "C" void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim);
 
 
 bool g_mainLoppReady = false;
@@ -71,6 +72,14 @@ MainLoop::MainLoop()
 , m_proc(*this)
 {
 	m_decoder.Init(*this);
+	Wiegand::Instance().Init(
+		&htim4,
+		OUT_D1_GPIO_Port, OUT_D1_Pin,
+		OUT_D0_GPIO_Port, OUT_D0_Pin,
+		IN_D1_GPIO_Port, IN_D1_Pin,
+		IN_D0_GPIO_Port, IN_D0_Pin,
+		250
+	);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -355,6 +364,9 @@ void MainLoop::Loop()
 	m_com << "\r\n" CMNTS  "READY\r\n";
 	m_wifi << "\r\n" CMNTS "READY\r\n";
 
+	uint16_t t1=300;
+	uint16_t t2=0;
+
 	while(true)
 	{
 		now = HAL_GetTick();
@@ -418,6 +430,25 @@ void MainLoop::Loop()
 				lastHeartbeat = now;
 			}
 
+			bool sw=HAL_GPIO_ReadPin(SWITCH_GPIO_Port, SWITCH_Pin);
+
+			if (m_switchOld && !sw) {
+				m_log.log(m_log.INFO, m_rtcDateTime, "status del");
+				m_lcd.ClrId();
+				ClrAllStatus();
+			}
+			m_switchOld = sw;
+
+			if (++t1 == 1000) {
+				t1 = 0;
+				Wiegand::Instance().SetCode(Wiegand::OUT, m_rtcDateTime.sec);
+			}
+
+			if (++t2 == 1000) {
+				t2 = 0;
+				Wiegand::Instance().SetCode(Wiegand::IN, m_rtcDateTime.sec);
+			}
+
 			oldTick = now;
 		}
 
@@ -448,7 +479,7 @@ void MainLoop::Loop()
 		case States::PASSING:
 			if(ilChanged) {
 				if(ilStatus == InductiveLoop::NONE) {
-					m_db.setStatus(m_countedCode, m_cycleInner ? database::dbrecord::OUTSIDE : database::dbrecord::INSIDE);
+					SetStatus(m_countedCode, m_cycleInner ? database::dbrecord::OUTSIDE : database::dbrecord::INSIDE);
 					ChangeState(States::OFF, inner, now);
 				} else if(m_state != States::PASSING) {
 					ChangeState(States::PASSING, inner, m_stateStartedTick);
@@ -513,6 +544,7 @@ States MainLoop::Authorize( uint16_t id, bool inner )
 	if( !m_db.getParams(id & 0x3ff, rec) )
 		return ret;
 
+	rec.position = GetStatus(id);
 
 	if(!rec.in_start && !rec.in_end)
 		ret = States::UNREGISTERED;
@@ -597,5 +629,45 @@ void MainLoop::UpdateDow(sg::DS3231::Ts &ts)
 		f.Close();
 	}
 }
+
+////////////////////////////////////////////////////////////////////
+void MainLoop::SetStatus( int code, database::dbrecord::POSITION pos ) {
+	if (code<1024) {
+		uint8_t shift = (code & 3) << 1;
+		uint8_t pos = code >> 2;
+		m_status[pos] = (m_status[pos] & (0xFF ^ (3<<shift))) | ((uint8_t)pos << shift);
+	}
+}
+
+////////////////////////////////////////////////////////////////////
+database::dbrecord::POSITION MainLoop::GetStatus( int code) {
+	database::dbrecord::POSITION res = database::dbrecord::UNKNOWN;
+	if (code<1024) {
+		uint8_t shift = (code & 3) << 1;
+		uint8_t pos = code >> 2;
+		res = static_cast<database::dbrecord::POSITION>((m_status[pos] >> shift) & 3);
+	}
+	return res;
+}
+
+////////////////////////////////////////////////////////////////////
+void MainLoop::ClrAllStatus() {
+	memset(&m_status,0,sizeof(m_status));
+}
+
+////////////////////////////////////////////////////////////////////
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+	if (htim==&htim1) {
+		RFDecoder::Instance().PeriodEllapsed(htim);
+	} else {
+		Wiegand::Instance().TimerUpdateIT(htim);
+	}
+}
+
+////////////////////////////////////////////////////////////////////
+void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim) {
+	Wiegand::Instance().TimerPWMIT(htim);
+}
+
 
 #endif	//	TESTLOOP

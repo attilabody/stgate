@@ -89,6 +89,12 @@ void Display::UpdateLastReceivedId( uint16_t id )
 }
 
 //////////////////////////////////////////////////////////////////////////////
+void Display::ClrId()
+{
+	Update(12, 0, " CLR");
+}
+
+//////////////////////////////////////////////////////////////////////////////
 States Display::UpdateLastDecision(States state, uint16_t id, char reason)
 {
 	char buf[5] { (state == States::DENY && reason && reason != ' ') ? reason : g_stateSigns[state], ' ', 0 };

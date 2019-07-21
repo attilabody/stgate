@@ -23,6 +23,7 @@
 #include "pulsingoutput.h"
 #include "i2cdb.h"
 #include "inductiveloop.h"
+#include "wiegand.h"
 #include "commsyms.h"
 
 
@@ -32,6 +33,7 @@ class MainLoop
 		, public sg::Usart::IReceiverCallback
 {
 	friend class sg::Singleton<MainLoop>;
+
 
 public:
 	MainLoop();
@@ -46,6 +48,10 @@ private:
 	States Authorize(uint16_t id, bool inner);
 	void ChangeState(States newStatus, bool inner, uint32_t now);//, bool ilChanged);
 
+	void SetStatus( int code, database::dbrecord::POSITION pos );
+	database::dbrecord::POSITION GetStatus( int code);
+	void ClrAllStatus();
+
 	TrafficLights	m_lights;
 	PulsingOutput	m_gate;
 	sg::Usart		m_com;
@@ -54,6 +60,7 @@ private:
 	i2cdb			m_db;
 	sg::DS3231_DST	m_rtc;
 	Display			m_lcd;
+	uint8_t			m_status[256];
 
 	RFDecoder		&m_decoder;
 	InductiveLoop	m_loop;
@@ -94,6 +101,8 @@ private:
 
 	InductiveLoop::STATUS	m_ilStatus = InductiveLoop::NONE;
 	bool					m_ilConflict = false;
+
+	bool			m_switchOld = false;
 
 
 	//	utility functions
