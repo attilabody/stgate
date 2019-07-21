@@ -60,22 +60,22 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define SD_CS_Pin GPIO_PIN_4
 #define SD_CS_GPIO_Port GPIOA
+#define SWITCH_Pin GPIO_PIN_2
+#define SWITCH_GPIO_Port GPIOB
 #define OPEN_Pin GPIO_PIN_12
 #define OPEN_GPIO_Port GPIOB
+#define OUT_D1_Pin GPIO_PIN_13
+#define OUT_D1_GPIO_Port GPIOB
 #define LOOP_O_Pin GPIO_PIN_14
 #define LOOP_O_GPIO_Port GPIOB
 #define LOOP_I_Pin GPIO_PIN_15
 #define LOOP_I_GPIO_Port GPIOB
-#define BTN_CLK_Pin GPIO_PIN_15
-#define BTN_CLK_GPIO_Port GPIOA
-#define BTN_CLK_EXTI_IRQn EXTI15_10_IRQn
-#define BTN_DATA_Pin GPIO_PIN_3
-#define BTN_DATA_GPIO_Port GPIOB
-#define BTN_SW_Pin GPIO_PIN_4
-#define BTN_SW_GPIO_Port GPIOB
-#define BTN_SW_EXTI_IRQn EXTI4_IRQn
-#define BTN_PLUS_Pin GPIO_PIN_5
-#define BTN_PLUS_GPIO_Port GPIOB
+#define IN_D0_Pin GPIO_PIN_15
+#define IN_D0_GPIO_Port GPIOA
+#define IN_D1_Pin GPIO_PIN_3
+#define IN_D1_GPIO_Port GPIOB
+#define OUT_D0_Pin GPIO_PIN_4
+#define OUT_D0_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
