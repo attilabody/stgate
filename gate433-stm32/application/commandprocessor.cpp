@@ -83,33 +83,10 @@ void MainLoop::CommandProcessor::Process(sg::Usart &com, char * buffer)
 			PrintRespErr(com);
 
 	} else if(IsCommand(CMD_IMPORTDB)) {	//	import database
-		uint16_t changed = 0, id = 0;
+		uint16_t changed = 0;
 		uint16_t from = GetParam();
 		uint16_t to = GetParam();
-		if(to > MAX_CODE) to = MAX_CODE;
-		if(from == 0xffff) from = 0;
-		else if(from > to) from = to;
-		thindb tdb;
-		database::dbrecord rec, old;
-		if(tdb.init("DB.TXT", true)) {
-			for(id = from; id <= to; ++id) {
-				if(!tdb.getParams(id, rec) || !m_parent.m_db.getParams(id, old))
-					break;
-				if(!rec.infoequal(old))
-				{
-					com << '+';
-					if(!m_parent.m_db.setParams(id, rec))
-						break;
-					else
-						changed++;
-				}
-			}
-			if(id != to+1)
-				id = 0;
-			tdb.close();
-		}
-		com << sg::Usart::endl;
-		if(id)
+		if(m_parent.Import(from, to, changed))
 			PrintRespOk(com);
 		else
 			PrintRespErr(com);

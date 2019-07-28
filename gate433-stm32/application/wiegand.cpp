@@ -26,7 +26,7 @@ HAL_StatusTypeDef  Wiegand::Init(
 	return HAL_TIM_Base_Start_IT(htim);
 }
 
-void Wiegand::SetCode(DIR dir, uint32_t code) {
+void Wiegand::SetCode(bool inner, uint32_t code) {
 	uint32_t i = 0;
 	uint32_t mask = 1 << 24;
 
@@ -54,7 +54,7 @@ void Wiegand::SetCode(DIR dir, uint32_t code) {
 		code |= 1;
 
 	code <<= 6;
-	if (dir == IN) {
+	if (inner) {
 		m_inCode = code;
 		m_inLeft = 26;
 	} else {

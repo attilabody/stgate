@@ -42,10 +42,10 @@ TrafficLights::TrafficLights(uint16_t switchStep, uint16_t blinkStep)
 ////////////////////////////////////////////////////////////////////
 void TrafficLights::SetMode(States mode, bool inner)
 {
+	uint8_t primaryOffset = inner ? 0 : 3;
+	uint8_t secondaryOffset = inner ? 3 : 0;
 	if(mode < States::NUMSTATES)
 	{
-		uint8_t primaryOffset = inner ? 0 : 3;
-		uint8_t secondaryOffset = inner ? 3 : 0;
 		uint8_t primaryVals = COMPSTATES[mode];
 		uint8_t secondaryVals = COMPSTATES[mode] >> 8;
 
@@ -55,6 +55,17 @@ void TrafficLights::SetMode(States mode, bool inner)
 			SmartLights::SetMode(light+primaryOffset, primaryMode, primaryMode < SmartLights::BLINK ? m_switchStep : m_blinkStep );
 			SmartLights::SetMode(light+secondaryOffset, secondaryMode, secondaryMode < SmartLights::BLINK ? m_switchStep : m_blinkStep );
 		}
+	} else {
+		for(uint8_t light = 0; light < 3; ++light) {
+			SmartLights::SetMode(light+primaryOffset, SmartLights::Mode::ON, m_blinkStep );
+			SmartLights::SetMode(light+secondaryOffset, SmartLights::Mode::OFF, m_blinkStep );
+		}
 	}
 }
 
+////////////////////////////////////////////////////////////////////
+void TrafficLights::BlinkPrimaryYellow(bool inner)
+{
+	uint8_t primaryOffset = inner ? 0 : 3;
+	SmartLights::SetMode(primaryOffset+1, SmartLights::Mode::BLINK, m_blinkStep );
+}

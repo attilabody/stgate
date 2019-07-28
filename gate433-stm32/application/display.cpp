@@ -15,7 +15,6 @@ Display::Display(sg::I2cMaster &i2c, uint8_t i2cAddress)
 : sg::I2cLcd(i2c, i2cAddress)
 {
 	sg::I2cLcd::Init();
-	UpdateLoopStatus(false, false, false);
 
 	uint8_t offset = 0;
 	for(uint8_t line = 0; line < 4; ++line) {

@@ -20,6 +20,9 @@ public:
 	~Display() = default;
 	using sg::I2cLcd::Init;
 
+	void Clear() { sg::I2cLcd::Clear(); }
+	void Update(uint8_t x, uint8_t y, const char *str);
+	void Update(const char *str);
 	void UpdateDt(const sg::DS3231::Ts &dt, bool deSync);
 	void UpdateLoopStatus( bool inner, bool outer, bool conflict);
 	void UpdateLastReceivedId( uint16_t id);
@@ -29,8 +32,6 @@ public:
 	uint16_t GetLastReceivedId() { return m_lastReceivedId; }
 
 protected:
-	void Update(uint8_t x, uint8_t y, const char *str);
-	void Update(const char *str);
 
 	sg::DS3231::Ts	m_dt;
 	bool			m_deSync = false;

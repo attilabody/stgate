@@ -31,7 +31,6 @@ class Wiegand : public sg::Singleton<Wiegand>
 	friend void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim);
   public:
 	~Wiegand() = default;
-	enum DIR: uint8_t { IN, OUT };
 	HAL_StatusTypeDef Init(
 		TIM_HandleTypeDef *htim,
 		GPIO_TypeDef *outD1Port, uint16_t outD1Pin,
@@ -40,7 +39,7 @@ class Wiegand : public sg::Singleton<Wiegand>
 		GPIO_TypeDef *inD0Port, uint16_t inD0Pin,
 		uint8_t facility
 	);
-	void SetCode(DIR dir, uint32_t code);
+	void SetCode(bool inner, uint32_t code);
 	void TimerUpdateIT(TIM_HandleTypeDef *htim);
 	void TimerPWMIT(TIM_HandleTypeDef *htim);
   private:

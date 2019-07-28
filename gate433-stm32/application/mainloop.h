@@ -51,6 +51,7 @@ private:
 	void SetStatus( int code, database::dbrecord::POSITION pos );
 	database::dbrecord::POSITION GetStatus( int code);
 	void ClrAllStatus();
+	bool Import(uint16_t from, uint16_t to, uint16_t &changed);
 
 	TrafficLights	m_lights;
 	PulsingOutput	m_gate;
@@ -103,6 +104,7 @@ private:
 	bool					m_ilConflict = false;
 
 	bool			m_switchOld = false;
+	bool			m_lastAuthMaster = false;
 
 
 	//	utility functions

@@ -118,6 +118,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  	HAL_Delay(100);
 	_MainLoop();
 
     /* USER CODE END WHILE */

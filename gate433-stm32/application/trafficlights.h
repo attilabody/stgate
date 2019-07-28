@@ -21,6 +21,7 @@ public:
 
 
 	void SetMode(States mode, bool inner);
+	void BlinkPrimaryYellow(bool inner);
 private:
 
 	uint16_t m_switchStep, m_blinkStep;

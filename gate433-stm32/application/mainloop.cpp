@@ -12,6 +12,7 @@
 #include "spi.h"
 #include "usart.h"
 #include "gpio.h"
+#include "thindb.h"
 
 #include <sg/ItLock.h>
 
@@ -342,7 +343,31 @@ void MainLoop::Loop()
 	bool					inner = false;
 	bool					ilChanged = false;
 	
+	{
+		SdFile	f;
+		if( f.Open("IMP", static_cast<SdFile::OpenMode>(SdFile::OPEN_EXISTING | SdFile::READ)) == FR_OK) {
+			f.Close();
+			SdVolume v;
+			v.Unlink("IMP");
+			uint16_t changed;
+			Import(0,MAX_CODE,changed);
+			m_lcd.Update(0,0,"Imported:");
+			m_lcd.UpdateLastReceivedId(changed);
+			HAL_Delay(5000);
+			m_lcd.Clear();
+		}
+	}
+
 	g_mainLoppReady = true;
+
+	m_lcd.UpdateLoopStatus(false, true, false);
+	m_lights.SetMode(States::NUMSTATES, false);
+	HAL_Delay(1000);
+	m_lcd.UpdateLoopStatus(true, false, false);
+	m_lights.SetMode(States::NUMSTATES, true);
+	HAL_Delay(1000);
+	m_lcd.UpdateLoopStatus(false, false, false);
+	m_lights.SetMode(States::OFF, false);
 
 	{
 		m_rtc.Get(m_rtcDateTime, m_rtcDesync);
@@ -356,6 +381,8 @@ void MainLoop::Loop()
 	oldTick = m_rtcTick;
 	lastHeartbeat = m_rtcTick;
 
+	m_log.log(m_log.INFO, m_rtcDateTime, "RESET", (int)m_rtcDesync);
+
 	if((ret = m_com.Receive(m_serialBuffer, sizeof(m_serialBuffer), *this)) != HAL_OK)
 		m_log.log(logwriter::ERROR, m_rtcDateTime, "m_com.Receive", ret);
 	if((ret = m_wifi.Receive(m_wifiBuffer, sizeof(m_wifiBuffer), *this)) != HAL_OK)
@@ -363,9 +390,6 @@ void MainLoop::Loop()
 
 	m_com << "\r\n" CMNTS  "READY\r\n";
 	m_wifi << "\r\n" CMNTS "READY\r\n";
-
-	uint16_t t1=300;
-	uint16_t t2=0;
 
 	while(true)
 	{
@@ -439,16 +463,6 @@ void MainLoop::Loop()
 			}
 			m_switchOld = sw;
 
-			if (++t1 == 1000) {
-				t1 = 0;
-				Wiegand::Instance().SetCode(Wiegand::OUT, m_rtcDateTime.sec);
-			}
-
-			if (++t2 == 1000) {
-				t2 = 0;
-				Wiegand::Instance().SetCode(Wiegand::IN, m_rtcDateTime.sec);
-			}
-
 			oldTick = now;
 		}
 
@@ -516,17 +530,24 @@ void MainLoop::Loop()
 ////////////////////////////////////////////////////////////////////
 void MainLoop::ChangeState(States newStatus, bool inner, uint32_t now)
 {
+	bool open = false;
 	if(newStatus == States::CODEWAIT) {
 		m_countedCode = -1;
 		m_codeReceived = false;
 		m_cycleInner = inner;
 	} else if(newStatus == States::ACCEPT || newStatus == States::WARN) {
 		m_gate.Set(500, 1500, now);
+		open = true;
 	} else if(newStatus == States::OFF)
 		m_gate.Reset();
 
 	m_stateStartedTick = now;
 	m_lights.SetMode(newStatus, inner);
+	if (open) {
+		Wiegand::Instance().SetCode(inner, m_code&0x3ff);
+		if (m_lastAuthMaster && m_rtcDesync)
+			m_lights.BlinkPrimaryYellow(inner);
+	}
 	m_state = newStatus;
 }
 
@@ -545,6 +566,7 @@ States MainLoop::Authorize( uint16_t id, bool inner )
 		return ret;
 
 	rec.position = GetStatus(id);
+	m_lastAuthMaster = rec.days & 0x80;
 
 	if(!rec.in_start && !rec.in_end)
 		ret = States::UNREGISTERED;
@@ -568,7 +590,7 @@ States MainLoop::Authorize( uint16_t id, bool inner )
 		}
 	}
 	m_log.log(logwriter::INFO, m_rtcDateTime, "Auth", id&0x3ff, id >> 10, rec.position, inner, ret, reason );
-	if((rec.days & 0x80) && ret == States::DENY)
+	if(m_lastAuthMaster && ret == States::DENY)
 		ret = States::WARN;
 
 	m_lcd.UpdateLastDecision(ret, id, reason);
@@ -634,8 +656,8 @@ void MainLoop::UpdateDow(sg::DS3231::Ts &ts)
 void MainLoop::SetStatus( int code, database::dbrecord::POSITION pos ) {
 	if (code<1024) {
 		uint8_t shift = (code & 3) << 1;
-		uint8_t pos = code >> 2;
-		m_status[pos] = (m_status[pos] & (0xFF ^ (3<<shift))) | ((uint8_t)pos << shift);
+		uint8_t index = code >> 2;
+		m_status[index] = (m_status[index] & (0xFF ^ (3<<shift))) | ((uint8_t)pos << shift);
 	}
 }
 
@@ -644,8 +666,8 @@ database::dbrecord::POSITION MainLoop::GetStatus( int code) {
 	database::dbrecord::POSITION res = database::dbrecord::UNKNOWN;
 	if (code<1024) {
 		uint8_t shift = (code & 3) << 1;
-		uint8_t pos = code >> 2;
-		res = static_cast<database::dbrecord::POSITION>((m_status[pos] >> shift) & 3);
+		uint8_t index = code >> 2;
+		res = static_cast<database::dbrecord::POSITION>((m_status[index] >> shift) & 3);
 	}
 	return res;
 }
@@ -669,5 +691,33 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim) {
 	Wiegand::Instance().TimerPWMIT(htim);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+bool MainLoop::Import(uint16_t from, uint16_t to, uint16_t &changed) {
+	changed=0;
+	if(to > MAX_CODE) to = MAX_CODE;
+	if(from == 0xffff) from = 0;
+	else if(from > to) from = to;
+	thindb tdb;
+	database::dbrecord rec, old;
+	if(tdb.init("DB.TXT", true)) {
+		uint16_t id;
+		for(id = from; id <= to; ++id) {
+			if(!tdb.getParams(id, rec) || !m_db.getParams(id, old))
+				break;
+			if(!rec.infoequal(old))
+			{
+				if(!m_db.setParams(id, rec))
+					break;
+				else
+					changed++;
+			}
+		}
+		if(id != to+1)
+			id = 0;
+		tdb.close();
+		return true;
+	}
+	return false;
+}
 
 #endif	//	TESTLOOP
