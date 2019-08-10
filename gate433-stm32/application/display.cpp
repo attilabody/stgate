@@ -70,6 +70,14 @@ void Display::UpdateDt(const sg::DS3231::Ts &dt, bool deSync)
 }
 
 //////////////////////////////////////////////////////////////////////////////
+void Display::UpdateDow( uint8_t dow )
+{
+	Update(9, 0, "d");
+	char d=dow + '0';
+	Update(&d);
+}
+
+//////////////////////////////////////////////////////////////////////////////
 void Display::UpdateLoopStatus( bool inner, bool outer, bool conflict )
 {
 	Update(9, 0, (outer ? "O" : (conflict ? "o" : "_")));

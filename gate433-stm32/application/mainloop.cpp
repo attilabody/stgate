@@ -442,7 +442,11 @@ void MainLoop::Loop()
 			if(ilChanged) {
 				m_ilStatus = ilStatus;
 				m_ilConflict = ilConflict;
-				m_lcd.UpdateLoopStatus(ilStatus == InductiveLoop::INNER, ilStatus == InductiveLoop::OUTER, ilConflict);
+				if (ilStatus != InductiveLoop::NONE) {
+					m_lcd.UpdateLoopStatus(ilStatus == InductiveLoop::INNER, ilStatus == InductiveLoop::OUTER, ilConflict);
+				} else {
+					m_lcd.UpdateDow(m_rtcDateTime.wday);
+				}
 				inner = ilStatus == InductiveLoop::INNER;
 			}
 

@@ -24,6 +24,7 @@ public:
 	void Update(uint8_t x, uint8_t y, const char *str);
 	void Update(const char *str);
 	void UpdateDt(const sg::DS3231::Ts &dt, bool deSync);
+	void UpdateDow(uint8_t dow);
 	void UpdateLoopStatus( bool inner, bool outer, bool conflict);
 	void UpdateLastReceivedId( uint16_t id);
 	void ClrId();
