@@ -654,6 +654,7 @@ void MainLoop::UpdateDow(sg::DS3231::Ts &ts)
 		} while(fr == FR_OK && (used || read));
 		f.Close();
 	}
+	m_lcd.UpdateDow(ts.wday);
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -72,9 +72,9 @@ void Display::UpdateDt(const sg::DS3231::Ts &dt, bool deSync)
 //////////////////////////////////////////////////////////////////////////////
 void Display::UpdateDow( uint8_t dow )
 {
-	Update(9, 0, "d");
-	char d=dow + '0';
-	Update(&d);
+	char str[]="d0";
+	str[1]=dow + '0';
+	Update(9, 0, str);
 }
 
 //////////////////////////////////////////////////////////////////////////////
