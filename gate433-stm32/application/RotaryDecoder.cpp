@@ -6,6 +6,7 @@
  */
 #include "stm32f1xx_hal.h"
 #include <RotaryDecoder.h>
+#include <main.h>
 
 ////////////////////////////////////////////////////////////////////
 RotaryDecoder::	RotaryDecoder(
