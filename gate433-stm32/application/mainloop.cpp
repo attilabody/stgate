@@ -72,6 +72,9 @@ MainLoop::MainLoop()
 , m_log("LOG.TXT")
 , m_proc(*this)
 {
+	HAL_Delay(500);
+	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+	m_lcd.Start();
 	m_decoder.Init(*this);
 	Wiegand::Instance().Init(
 		&htim4,
@@ -348,7 +351,7 @@ void MainLoop::Loop()
 		if( f.Open("IMP", static_cast<SdFile::OpenMode>(SdFile::OPEN_EXISTING | SdFile::READ)) == FR_OK) {
 			f.Close();
 			SdVolume v;
-			v.Unlink("IMP");
+			// v.Unlink("IMP");
 			uint16_t changed;
 			Import(0,MAX_CODE,changed);
 			m_lcd.Update(0,0,"Imported:");

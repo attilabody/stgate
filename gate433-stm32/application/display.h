@@ -20,6 +20,7 @@ public:
 	~Display() = default;
 	using sg::I2cLcd::Init;
 
+	void Start();
 	void Clear() { sg::I2cLcd::Clear(); }
 	void Update(uint8_t x, uint8_t y, const char *str);
 	void Update(const char *str);

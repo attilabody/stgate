@@ -14,14 +14,22 @@
 Display::Display(sg::I2cMaster &i2c, uint8_t i2cAddress)
 : sg::I2cLcd(i2c, i2cAddress)
 {
-	sg::I2cLcd::Init();
-
 	uint8_t offset = 0;
 	for(uint8_t line = 0; line < 4; ++line) {
 		m_lineOffsets[line] = offset;
 		offset += WIDTH;
 	}
 	memset(m_backBuffer, ' ', sizeof(m_backBuffer));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+void Display::Start()
+{
+	sg::I2cLcd::Init();
+	for (uint8_t i=0; i<10; i++) {
+		Update(">");
+		HAL_Delay(200);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
