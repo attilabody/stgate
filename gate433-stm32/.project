@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
 	<name>gate433-stm32</name>
-	<comment />
+	<comment></comment>
 	<projects>
 	</projects>
 	<buildSpec>
@@ -20,10 +20,10 @@
 	</buildSpec>
 	<natures>
 		<nature>org.eclipse.cdt.core.cnature</nature>
-		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
-		<nature>fr.ac6.mcu.ide.core.MCUProjectNature</nature>
 		<nature>org.eclipse.cdt.core.ccnature</nature>
+		<nature>com.st.stm32cube.ide.mcu.MCUSW4STM32ConvertedProjectNature</nature>
+		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 	</natures>
 	<linkedResources>
 		<link>
@@ -34,12 +34,12 @@
 		<link>
 			<name>stm32goodies/inc</name>
 			<type>2</type>
-			<location>PARENT-1-PROJECT_LOC/stm32goodies/inc</location>
+			<locationURI>PARENT-1-PROJECT_LOC/stm32goodies/inc</locationURI>
 		</link>
 		<link>
 			<name>stm32goodies/src</name>
 			<type>2</type>
-			<location>PARENT-1-PROJECT_LOC/stm32goodies/src</location>
+			<locationURI>PARENT-1-PROJECT_LOC/stm32goodies/src</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

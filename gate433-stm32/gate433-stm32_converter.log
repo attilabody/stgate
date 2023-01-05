@@ -1,0 +1,24 @@
+Project: gate433-stm32
+Converter: ST System Workbench for STM32 project converter
+Date: 20230105
+
+Unknown value type "" for id gnu.c.compiler.option.include.files on tool fr.ac6.managedbuild.tool.gnu.cross.c.compiler
+No map found for id: gnu.cpp.compiler.optimization.level.size
+Unknown value type "" for id gnu.c.link.option.libs on tool fr.ac6.managedbuild.tool.gnu.cross.c.linker
+Unknown value type "" for id gnu.c.link.option.paths on tool fr.ac6.managedbuild.tool.gnu.cross.c.linker
+Option fr.ac6.managedbuild.tool.gnu.cross.cpp.linker.noexceptions is no longer supported
+Option fr.ac6.managedbuild.tool.gnu.cross.cpp.linker.nortti is no longer supported
+Value type err, id: gnu.cpp.link.option.flags
+Unknown value type "" for id gnu.both.asm.option.include.paths on tool fr.ac6.managedbuild.tool.gnu.cross.assembler
+Unknown value type "" for id gnu.c.link.option.libs on tool fr.ac6.managedbuild.tool.gnu.cross.c.linker
+Unknown value type "" for id gnu.c.link.option.paths on tool fr.ac6.managedbuild.tool.gnu.cross.c.linker
+Option fr.ac6.managedbuild.tool.gnu.cross.cpp.linker.noexceptions is no longer supported
+Option fr.ac6.managedbuild.tool.gnu.cross.cpp.linker.nortti is no longer supported
+Value type err, id: gnu.cpp.link.option.flags
+Unknown value type "" for id gnu.both.asm.option.include.paths on tool fr.ac6.managedbuild.tool.gnu.cross.assembler
+Unknown value type "" for id gnu.c.link.option.libs on tool fr.ac6.managedbuild.tool.gnu.cross.c.linker
+Unknown value type "" for id gnu.c.link.option.paths on tool fr.ac6.managedbuild.tool.gnu.cross.c.linker
+Option fr.ac6.managedbuild.tool.gnu.cross.cpp.linker.noexceptions is no longer supported
+Option fr.ac6.managedbuild.tool.gnu.cross.cpp.linker.nortti is no longer supported
+Value type err, id: gnu.cpp.link.option.flags
+Unknown value type "" for id gnu.both.asm.option.include.paths on tool fr.ac6.managedbuild.tool.gnu.cross.assembler
