@@ -1,0 +1,5 @@
+(sym_lib_table
+  (version 0)
+  (lib (name "bluepill-rescue")(type "Legacy")(uri "${KIPRJMOD}/bluepill-rescue.lib")(options "")(descr ""))
+  (lib (name "bluepill")(type "Legacy")(uri "${KIPRJMOD}/libs/bluepill.lib")(options "")(descr ""))
+)
