@@ -69,7 +69,6 @@ private:
 
 	States			m_state = States::OFF;
 	uint32_t		m_stateStartedTick = 0;
-	bool			m_cycleInner = false;
 
 	static const uint8_t	LINEBUFFER_SIZE = 32;
 	char			m_serialOutRingBuffer[32];
@@ -87,14 +86,16 @@ private:
 	// IDecoderCallback
 	virtual void CodeReceived(uint16_t code);
 	uint16_t		m_code = 0xffff;
-	uint16_t		m_countedCode = 0xffff;
 	volatile bool	m_codeReceived = false;
+	bool			m_dropOldCode = false;
 
 	static const uint8_t CODE_LOG_QUEUE_SIZE = 4;
 	uint16_t		m_codeLogQueue[CODE_LOG_QUEUE_SIZE];
 	uint8_t			m_codeLogQueueIndex = 0;
 	uint16_t		m_lastCodeReceived = 0xffff;
 	uint32_t		m_lastCodeReceivedTick = 0;
+	uint32_t		m_lastCodeChangedTick = 0;
+	uint32_t		m_codeReceivedCounter = 0;
 
 	sg::DS3231::Ts	m_rtcDateTime;
 	bool			m_rtcDesync = false;

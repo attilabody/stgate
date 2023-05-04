@@ -155,11 +155,17 @@ void MainLoop::CodeReceived(uint16_t code)
 		m_codeReceived = true;
 	}
 	uint32_t now = HAL_GetTick();
-	if(m_codeLogQueueIndex < CODE_LOG_QUEUE_SIZE && (m_lastCodeReceived != code || now - m_lastCodeReceivedTick > 1000))
+	bool changed = (m_lastCodeReceived != code) | m_dropOldCode;
+	if (m_dropOldCode)
+		m_dropOldCode = false;
+	if(m_codeLogQueueIndex < CODE_LOG_QUEUE_SIZE && ( changed || now - m_lastCodeReceivedTick > 1000))
 		m_codeLogQueue[m_codeLogQueueIndex++] = code;
 
 	m_lastCodeReceived = code;
 	m_lastCodeReceivedTick = now;
+	++m_codeReceivedCounter;
+	if (changed)
+		m_lastCodeChangedTick = now;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -337,14 +343,11 @@ void MainLoop::Loop()
 void MainLoop::Loop()
 {
 	HAL_StatusTypeDef		ret = HAL_OK;
-	uint32_t				oldTick, ellapsed;
+	uint32_t				oldTick;
 	uint32_t				now, lastHeartbeat;
 	sg::DS3231::Ts			ts;
 
-	InductiveLoop::STATUS	ilStatus = InductiveLoop::NONE;
-	bool					ilConflict = false;
 	bool					inner = false;
-	bool					ilChanged = false;
 	
 	{
 		SdFile	f;
@@ -435,13 +438,13 @@ void MainLoop::Loop()
 
 		if(now != oldTick)
 		{
+			/*
 			{
 				sg::ItLock	lock;
 				ilStatus = m_loop.GetStatus();
 				ilConflict = m_loop.GetConflict();
 			}
 			ilChanged = ilStatus != m_ilStatus || ilConflict != m_ilConflict;
-
 			if(ilChanged) {
 				m_ilStatus = ilStatus;
 				m_ilConflict = ilConflict;
@@ -452,14 +455,17 @@ void MainLoop::Loop()
 				}
 				inner = ilStatus == InductiveLoop::INNER;
 			}
+			*/
 
 			if(CheckDateTime(now))
 				m_lcd.UpdateDt(m_rtcDateTime, m_rtcDesync);
 
+			/*
 			if(now - lastHeartbeat >= 500) {
 				HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 				lastHeartbeat = now;
 			}
+			*/
 
 			bool sw=HAL_GPIO_ReadPin(SWITCH_GPIO_Port, SWITCH_Pin);
 
@@ -470,59 +476,53 @@ void MainLoop::Loop()
 			}
 			m_switchOld = sw;
 
+			if ((m_code != 0xffff) && (now - m_lastCodeReceivedTick > 100)) {
+				m_code = 0xffff;
+				m_dropOldCode = true;
+			}
+
 			oldTick = now;
 		}
 
+		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 		switch(m_state)
 		{
 		case States::OFF:
-		case States::CONFLICT:
-		case States::CODEWAIT:
-			if(ilChanged)
-			{
-				ChangeState(ilStatus == InductiveLoop::NONE ? States::OFF : (ilConflict ? States::CONFLICT : States::CODEWAIT), inner, now);
-			}
-			else if(m_state == States::CODEWAIT && m_codeReceived)
-			{
-				if(m_code == m_countedCode) {	// received second time
-					ChangeState(Authorize(m_code, inner), inner, now);
-				} else {
-					m_countedCode = m_code;
-					m_codeReceived = false;
+			if(m_codeReceived) {
+				if (now - m_lastCodeChangedTick > 100)
+				{
+					ChangeState(States::CODEWAIT, inner, now);
 				}
+				m_codeReceived = false;
 			}
-
 			break;
-
+		case States::CODEWAIT:
+			if(m_codeReceived) {
+				if (now - m_lastCodeChangedTick > 1100)
+				{
+					States state = Authorize(m_code, inner);
+					if ((state == States::ACCEPT) || (state == States::ACCEPT))
+						SetStatus(m_code, database::dbrecord::OUTSIDE);
+					ChangeState(state, inner, now);
+				}
+				m_codeReceived = false;
+			} else {
+				if (now - m_lastCodeReceivedTick > 5000)
+					ChangeState(States::OFF, inner, now);
+			}
+			break;
 		case States::ACCEPT:
 		case States::WARN:
-		case States::HURRY:
-		case States::PASSING:
-			if(ilChanged) {
-				if(ilStatus == InductiveLoop::NONE) {
-					SetStatus(m_countedCode, m_cycleInner ? database::dbrecord::OUTSIDE : database::dbrecord::INSIDE);
-					ChangeState(States::OFF, inner, now);
-				} else if(m_state != States::PASSING) {
-					ChangeState(States::PASSING, inner, m_stateStartedTick);
-				}
-			} else if(m_state == States::ACCEPT || m_state == States::WARN) {
-				ellapsed = now - m_stateStartedTick;
-				if(ellapsed > Config::Instance().passTimeout * 1000)
-					ChangeState(States::HURRY, inner, now);
-			} else {
-				ellapsed = now - m_stateStartedTick;
-				if(ellapsed > Config::Instance().hurryTimeout * 1000)
-					ChangeState(States::OFF, inner, now);
-			}
-			break;
-
 		case States::DENY:
 		case States::UNREGISTERED:
-			if(ilChanged && ilStatus != (m_cycleInner ? InductiveLoop::INNER : InductiveLoop::OUTER)) {
-				ChangeState(ilStatus == InductiveLoop::NONE ? States::OFF : (ilConflict ? States::CONFLICT : States::CODEWAIT), inner, now);
+			if (now - m_stateStartedTick > 5000) {
+				ChangeState(States::OFF, inner, now);
 			}
 			break;
 
+		case States::CONFLICT:
+		case States::HURRY:
+		case States::PASSING:
 		case States::NUMSTATES:	// should not happen
 			break;
 		}	//	switch(m_state)
@@ -538,15 +538,14 @@ void MainLoop::Loop()
 void MainLoop::ChangeState(States newStatus, bool inner, uint32_t now)
 {
 	bool open = false;
-	if(newStatus == States::CODEWAIT) {
-		m_countedCode = -1;
-		m_codeReceived = false;
-		m_cycleInner = inner;
-	} else if(newStatus == States::ACCEPT || newStatus == States::WARN) {
+	if(newStatus == States::ACCEPT || newStatus == States::WARN) {
 		m_gate.Set(500, 1500, now);
 		open = true;
-	} else if(newStatus == States::OFF)
+	} else if(newStatus == States::OFF) {
 		m_gate.Reset();
+		m_codeReceived = false;
+		m_dropOldCode = true;
+	}
 
 	m_stateStartedTick = now;
 	m_lights.SetMode(newStatus, inner);
@@ -575,11 +574,13 @@ States MainLoop::Authorize( uint16_t id, bool inner )
 	rec.position = GetStatus(id);
 	m_lastAuthMaster = rec.days & 0x80;
 
-	if(!rec.in_start && !rec.in_end)
+	if(!rec.in_start && !rec.in_end) {
 		ret = States::UNREGISTERED;
-	else if( rec.position == ( inner ? database::dbrecord::OUTSIDE : database::dbrecord::INSIDE ) ) {
+	/*
+	} else if( rec.position == ( inner ? database::dbrecord::OUTSIDE : database::dbrecord::INSIDE ) ) {
 		ret = Config::Instance().relaxedPos ? States::WARN : States::DENY;
 		reason = 'P';
+	*/
 	} else if(!m_rtcDesync)
 	{
 		States	timeFail = Config::Instance().relaxedDateTime ? States::WARN : States::DENY;

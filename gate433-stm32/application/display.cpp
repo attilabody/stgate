@@ -107,6 +107,7 @@ void Display::UpdateLastReceivedId( uint16_t id )
 void Display::ClrId()
 {
 	Update(12, 0, " CLR");
+	m_lastReceivedId = 0xffff;
 }
 
 //////////////////////////////////////////////////////////////////////////////
