@@ -48,12 +48,14 @@ void TrafficLights::SetMode(States mode, bool inner)
 	{
 		uint8_t primaryVals = COMPSTATES[mode];
 		uint8_t secondaryVals = COMPSTATES[mode] >> 8;
-
 		for(uint8_t light = 0; light < 3; ++light) {
 			auto primaryMode = (SmartLights::Mode)((primaryVals >> (light << 1)) & 3);
 			auto secondaryMode = (SmartLights::Mode)((secondaryVals >> (light << 1)) & 3);
 			SmartLights::SetMode(light+primaryOffset, primaryMode, primaryMode < SmartLights::BLINK ? m_switchStep : m_blinkStep );
 			SmartLights::SetMode(light+secondaryOffset, secondaryMode, secondaryMode < SmartLights::BLINK ? m_switchStep : m_blinkStep );
+		}
+		if ((!inner) && (mode == States::CODEWAIT)) {
+			SmartLights::SetMode(1, SmartLights::Mode::ON, m_blinkStep );
 		}
 	} else {
 		for(uint8_t light = 0; light < 3; ++light) {

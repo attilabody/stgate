@@ -505,14 +505,18 @@ void MainLoop::Loop()
 				} else if(m_state != States::PASSING) {
 					ChangeState(States::PASSING, inner, m_stateStartedTick);
 				}
+			/*
 			} else if(m_state == States::ACCEPT || m_state == States::WARN) {
 				ellapsed = now - m_stateStartedTick;
 				if(ellapsed > Config::Instance().passTimeout * 1000)
 					ChangeState(States::HURRY, inner, now);
+			*/
 			} else {
 				ellapsed = now - m_stateStartedTick;
-				if(ellapsed > Config::Instance().hurryTimeout * 1000)
+				if(ellapsed > 15 * 1000) {
+					SetStatus(m_countedCode, m_cycleInner ? database::dbrecord::OUTSIDE : database::dbrecord::INSIDE);
 					ChangeState(States::OFF, inner, now);
+				}
 			}
 			break;
 
@@ -520,6 +524,10 @@ void MainLoop::Loop()
 		case States::UNREGISTERED:
 			if(ilChanged && ilStatus != (m_cycleInner ? InductiveLoop::INNER : InductiveLoop::OUTER)) {
 				ChangeState(ilStatus == InductiveLoop::NONE ? States::OFF : (ilConflict ? States::CONFLICT : States::CODEWAIT), inner, now);
+			} else {
+				ellapsed = now - m_stateStartedTick;
+				if(ellapsed > 15 * 1000)
+					ChangeState(States::OFF, inner, now);
 			}
 			break;
 

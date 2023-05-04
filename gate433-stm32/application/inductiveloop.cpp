@@ -32,12 +32,11 @@ void InductiveLoop::Tick(uint32_t now)
 		rawstatus |= (uint8_t) OUTER;
 
 	if( rawstatus == ( INNER | OUTER )) {
-		if( m_status == NONE )
-			m_status = INNER;
+		m_status = INNER;
 	} else
 		m_status = (STATUS)rawstatus;
 
-	m_conflict = (rawstatus == ( INNER | OUTER ));
+	// m_conflict = (rawstatus == ( INNER | OUTER ));
 }
 
 ////////////////////////////////////////////////////////////////////
