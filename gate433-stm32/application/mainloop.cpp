@@ -155,10 +155,13 @@ void MainLoop::CodeReceived(uint16_t code)
 		m_codeReceived = true;
 	}
 	uint32_t now = HAL_GetTick();
+	uint32_t elapsed = now - m_lastCodeReceivedTick;
+	if (elapsed > 100)
+		m_dropOldCode = true;
 	bool changed = (m_lastCodeReceived != code) | m_dropOldCode;
 	if (m_dropOldCode)
 		m_dropOldCode = false;
-	if(m_codeLogQueueIndex < CODE_LOG_QUEUE_SIZE && ( changed || now - m_lastCodeReceivedTick > 1000))
+	if(m_codeLogQueueIndex < CODE_LOG_QUEUE_SIZE && ( changed || elapsed > 1000))
 		m_codeLogQueue[m_codeLogQueueIndex++] = code;
 
 	m_lastCodeReceived = code;
@@ -460,12 +463,10 @@ void MainLoop::Loop()
 			if(CheckDateTime(now))
 				m_lcd.UpdateDt(m_rtcDateTime, m_rtcDesync);
 
-			/*
 			if(now - lastHeartbeat >= 500) {
 				HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 				lastHeartbeat = now;
 			}
-			*/
 
 			bool sw=HAL_GPIO_ReadPin(SWITCH_GPIO_Port, SWITCH_Pin);
 
@@ -476,15 +477,9 @@ void MainLoop::Loop()
 			}
 			m_switchOld = sw;
 
-			if ((m_code != 0xffff) && (now - m_lastCodeReceivedTick > 100)) {
-				m_code = 0xffff;
-				m_dropOldCode = true;
-			}
-
 			oldTick = now;
 		}
 
-		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 		switch(m_state)
 		{
 		case States::OFF:
