@@ -45,7 +45,7 @@ bool Config::Save()
 //////////////////////////////////////////////////////////////////////////////
 bool Config::Reset()
 {
-	Header	h;
+	uint8_t	h[sizeof(Header)];
 	memset(&h, 0, sizeof(h));
 	bool ret = (MainI2cEeprom::Instance().Write(&h, 0, sizeof(h)) == HAL_OK);
 	*static_cast<ConfigData*>(this) = ConfigData();
@@ -129,6 +129,20 @@ bool Config::Get(char* buffer, uint8_t index)
 		return true;
 	}
 	return false;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+void Config::SetBit(uint8_t bit, bool value)
+{
+	configBits &= ~(1<<bit);
+	if (value) configBits |= 1<<bit;
+	Save();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+bool Config::GetBit(uint8_t bit)
+{
+	return (configBits>>bit) & 1;
 }
 
 //////////////////////////////////////////////////////////////////////////////

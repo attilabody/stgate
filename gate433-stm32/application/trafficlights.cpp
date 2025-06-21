@@ -40,14 +40,14 @@ TrafficLights::TrafficLights(uint16_t switchStep, uint16_t blinkStep)
 {}
 
 ////////////////////////////////////////////////////////////////////
-void TrafficLights::SetMode(States mode, bool inner)
+void TrafficLights::SetMode(States mode, uint8_t side)
 {
-	uint8_t primaryOffset = inner ? 0 : 3;
-	uint8_t secondaryOffset = inner ? 3 : 0;
+	uint8_t primaryOffset = side ? 0 : 3;
+	uint8_t secondaryOffset = side ? 3 : 0;
 	if(mode < States::NUMSTATES)
 	{
 		uint8_t primaryVals = COMPSTATES[mode];
-		uint8_t secondaryVals = COMPSTATES[mode];	// SAME!
+		uint8_t secondaryVals = (side<2)?(COMPSTATES[mode] >> 8):COMPSTATES[mode];
 
 		for(uint8_t light = 0; light < 3; ++light) {
 			auto primaryMode = (SmartLights::Mode)((primaryVals >> (light << 1)) & 3);
@@ -64,9 +64,10 @@ void TrafficLights::SetMode(States mode, bool inner)
 }
 
 ////////////////////////////////////////////////////////////////////
-void TrafficLights::BlinkPrimaryYellow(bool inner)
+void TrafficLights::BlinkPrimaryYellow(uint8_t side)
 {
-//	uint8_t primaryOffset = inner ? 0 : 3;
-	SmartLights::SetMode(1, SmartLights::Mode::BLINK, m_blinkStep );
-	SmartLights::SetMode(4, SmartLights::Mode::BLINK, m_blinkStep );
+	if (side == 2) 
+		SmartLights::SetMode(1, SmartLights::Mode::BLINK, m_blinkStep);
+	uint8_t primaryOffset = side ? 0 : 3;
+	SmartLights::SetMode(primaryOffset+1, SmartLights::Mode::BLINK, m_blinkStep );
 }

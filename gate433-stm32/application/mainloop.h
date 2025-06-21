@@ -46,7 +46,7 @@ public:
 
 private:
 	States Authorize(uint16_t id, bool inner);
-	void ChangeState(States newStatus, bool inner, uint32_t now);//, bool ilChanged);
+	void ChangeState(States newStatus, uint8_t side, uint32_t now);//, bool ilChanged);
 
 	void SetStatus( int code, database::dbrecord::POSITION pos );
 	database::dbrecord::POSITION GetStatus( int code);
@@ -69,6 +69,7 @@ private:
 
 	States			m_state = States::OFF;
 	uint32_t		m_stateStartedTick = 0;
+	bool			m_cycleInner = false;
 
 	static const uint8_t	LINEBUFFER_SIZE = 32;
 	char			m_serialOutRingBuffer[32];
@@ -86,6 +87,7 @@ private:
 	// IDecoderCallback
 	virtual void CodeReceived(uint16_t code);
 	uint16_t		m_code = 0xffff;
+	uint16_t		m_countedCode = 0xffff;
 	volatile bool	m_codeReceived = false;
 	bool			m_dropOldCode = false;
 
@@ -95,23 +97,26 @@ private:
 	uint16_t		m_lastCodeReceived = 0xffff;
 	uint32_t		m_lastCodeReceivedTick = 0;
 	uint32_t		m_lastCodeChangedTick = 0;
-	uint32_t		m_codeReceivedCounter = 0;
 
 	sg::DS3231::Ts	m_rtcDateTime;
 	bool			m_rtcDesync = false;
 	uint32_t		m_rtcTick = 0;
+	uint32_t		m_cnlswChanged = 0;
 
 	InductiveLoop::STATUS	m_ilStatus = InductiveLoop::NONE;
 	bool					m_ilConflict = false;
 
 	bool			m_switchOld = false;
 	bool			m_lastAuthMaster = false;
+	bool			m_noLoopMode;
 
 
 	//	utility functions
 	void Fail(const char * file, int line);
 	bool CheckDateTime(uint32_t now);
 	void UpdateDow(sg::DS3231::Ts &ts);
+
+	void CheckClrNoLoopSw(uint32_t now);
 
 	class CommandProcessor
 	{

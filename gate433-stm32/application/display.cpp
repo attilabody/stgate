@@ -111,6 +111,18 @@ void Display::ClrId()
 }
 
 //////////////////////////////////////////////////////////////////////////////
+void Display::NoLoop(uint8_t x)
+{
+	char buffer[]="*NOL0";
+	if (x)
+		buffer[4]='1';
+	else
+		buffer[0]=' ';
+	Update(11, 0, buffer);
+	m_lastReceivedId = 0xffff;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 States Display::UpdateLastDecision(States state, uint16_t id, char reason)
 {
 	char buf[5] { (state == States::DENY && reason && reason != ' ') ? reason : g_stateSigns[state], ' ', 0 };
