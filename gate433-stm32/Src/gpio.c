@@ -72,10 +72,10 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(SD_CS_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PtPin */
-  GPIO_InitStruct.Pin = SWITCH_Pin;
+  GPIO_InitStruct.Pin = CLR_NOLOOP_SW_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(SWITCH_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(CLR_NOLOOP_SW_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PBPin PBPin PBPin PBPin */
   GPIO_InitStruct.Pin = OPEN_Pin|OUT_D1_Pin|IN_D1_Pin|OUT_D0_Pin;

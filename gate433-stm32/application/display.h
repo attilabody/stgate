@@ -29,6 +29,7 @@ public:
 	void UpdateLoopStatus( bool inner, bool outer, bool conflict);
 	void UpdateLastReceivedId( uint16_t id);
 	void ClrId();
+	void NoLoop(uint8_t x);
 	States UpdateLastDecision(States state, uint16_t id, char reason);
 
 	uint16_t GetLastReceivedId() { return m_lastReceivedId; }

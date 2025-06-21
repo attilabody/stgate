@@ -19,6 +19,7 @@ struct ConfigData {
 	uint8_t		hurryTimeout = 90;
 	bool		relaxedPos = false;
 	bool		relaxedDateTime = false;
+	uint8_t		configBits = 0;
 };
 
 struct Config : public ConfigData, public sg::Singleton<Config>
@@ -44,6 +45,8 @@ struct Config : public ConfigData, public sg::Singleton<Config>
 	bool Set(const char *name, const char *value);
 	bool Get(char* buffer, const char *name);
 	bool Get(char* buffer, uint8_t index);
+	void SetBit(uint8_t bit, bool value);
+	bool GetBit(uint8_t bit);
 
 private:
 	static ConfigItemDescriptor const s_configItems[5];

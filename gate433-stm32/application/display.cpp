@@ -107,6 +107,19 @@ void Display::UpdateLastReceivedId( uint16_t id )
 void Display::ClrId()
 {
 	Update(12, 0, " CLR");
+	m_lastReceivedId = 0xffff;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+void Display::NoLoop(uint8_t x)
+{
+	char buffer[]="*NOL0";
+	if (x)
+		buffer[4]='1';
+	else
+		buffer[0]=' ';
+	Update(11, 0, buffer);
+	m_lastReceivedId = 0xffff;
 }
 
 //////////////////////////////////////////////////////////////////////////////

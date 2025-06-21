@@ -60,8 +60,8 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define SD_CS_Pin GPIO_PIN_4
 #define SD_CS_GPIO_Port GPIOA
-#define SWITCH_Pin GPIO_PIN_2
-#define SWITCH_GPIO_Port GPIOB
+#define CLR_NOLOOP_SW_Pin GPIO_PIN_2
+#define CLR_NOLOOP_SW_GPIO_Port GPIOB
 #define OPEN_Pin GPIO_PIN_12
 #define OPEN_GPIO_Port GPIOB
 #define OUT_D1_Pin GPIO_PIN_13

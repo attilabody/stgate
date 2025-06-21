@@ -20,8 +20,8 @@ public:
 	virtual ~TrafficLights() = default;
 
 
-	void SetMode(States mode, bool inner);
-	void BlinkPrimaryYellow(bool inner);
+	void SetMode(States mode, uint8_t side);
+	void BlinkPrimaryYellow(uint8_t side);
 private:
 
 	uint16_t m_switchStep, m_blinkStep;
