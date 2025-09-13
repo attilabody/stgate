@@ -52,15 +52,15 @@ private:
 
 	IDecoderCallback *m_callback = nullptr;
 
-	// Ref time: 16250 us +- 3250 us (+- 20%)
-	static const uint32_t SYNC_PAUSE_MIN = RF_US_TO_TICK(16250 - 3250);
-	static const uint32_t SYNC_PAUSE_MAX = RF_US_TO_TICK(16250 + 3250);
-	// Ref time: 550 us +- 150 us (+- 27%)
-	static const uint32_t SYNC_SHORT_MIN = RF_US_TO_TICK(550 - 150);
-	static const uint32_t SYNC_SHORT_MAX = RF_US_TO_TICK(550 + 150);
-	// Ref time: 1380 us +- 280 us (+- 20%)
-	static const uint32_t BIT_TIME_MIN = RF_US_TO_TICK(1380 - 280);
-	static const uint32_t BIT_TIME_MAX = RF_US_TO_TICK(1380 + 280);
+	// Ref time: 14350 us +- 5023 us (+- 35%)
+	static const uint32_t SYNC_PAUSE_MIN = RF_US_TO_TICK(14350 - 5023);
+	static const uint32_t SYNC_PAUSE_MAX = RF_US_TO_TICK(14350 + 5023);
+	// Ref time: 500 us +- 200 us (+- 40%)
+	static const uint32_t SYNC_SHORT_MIN = RF_US_TO_TICK(500 - 200);
+	static const uint32_t SYNC_SHORT_MAX = RF_US_TO_TICK(500 + 200);
+	// Ref time: 1250 us +- 437 us (+- 35%)
+	static const uint32_t BIT_TIME_MIN = RF_US_TO_TICK(1250 - 437);
+	static const uint32_t BIT_TIME_MAX = RF_US_TO_TICK(1250 + 437);
 
 	uint32_t	m_lastLength = 0;
 
